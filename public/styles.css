@@ -53,12 +53,17 @@ a:focus-visible {
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
   border-right: 1px solid var(--color-border);
-  font-size: 0.85rem;
+  font-size: 1.15rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--color-text);
   text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+.logo:hover {
+  opacity: 0.7;
 }
 
 .app-tabs {
@@ -73,13 +78,15 @@ a:focus-visible {
 
 .app-tab {
   border: none;
+  border-bottom: 2px solid transparent;
   background: transparent;
-  border-radius: 3px;
-  padding: 6px 14px;
+  padding: 0 2px;
+  margin: 0 12px 0 0;
+  height: 100%;
   font-size: 0.88rem;
   color: var(--color-text-muted);
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: color 0.15s ease, border-color 0.15s ease;
 }
 
 .app-tab:hover {
@@ -87,9 +94,9 @@ a:focus-visible {
 }
 
 .app-tab.is-active {
-  background: var(--color-invert-bg);
-  color: var(--color-invert-text);
+  color: var(--color-text);
   font-weight: 600;
+  border-bottom-color: var(--color-text);
 }
 
 .sidebar {
