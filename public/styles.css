@@ -148,10 +148,6 @@ body.sidebar-collapsed .logo {
   border-bottom-color: var(--color-text);
 }
 
-.app-tab.is-active:hover {
-  border-bottom-color: var(--color-invert-text);
-}
-
 .sidebar {
   grid-area: sidebar;
   background: var(--color-surface);
