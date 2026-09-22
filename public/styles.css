@@ -199,6 +199,10 @@ body.sidebar-collapsed .logo {
   font-size: 0.83rem;
 }
 
+.sidebar-item.is-nested:hover {
+  background: var(--color-border-strong);
+}
+
 .sidebar-group {
   margin-bottom: 2px;
 }
@@ -237,9 +241,11 @@ body.sidebar-collapsed .logo {
 }
 
 .sidebar-group-children {
-  margin: 2px 0 6px 14px;
-  padding-left: 10px;
-  border-left: 1px solid var(--color-border);
+  margin: 2px 0 6px;
+  padding: 4px 0 4px 10px;
+  background: var(--color-border);
+  border-left: 1px solid var(--color-border-strong);
+  border-radius: 0 4px 4px 0;
 }
 
 /* 사이드바 접힘(아이콘 전용) 모드 */
