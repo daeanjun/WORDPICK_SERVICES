@@ -1,13 +1,13 @@
 :root {
-  --color-bg: #f6f5f2;
-  --color-surface: #ffffff;
-  --color-border: #e4e2db;
-  --color-border-strong: #d3d0c6;
-  --color-text: #232420;
-  --color-text-muted: #767468;
-  --color-text-faint: #a3a094;
-  --color-accent: #2e3646;
-  --color-accent-soft: #eceef1;
+  --color-bg: #17181b;
+  --color-surface: #1d1f22;
+  --color-border: #2b2d31;
+  --color-border-strong: #3a3c41;
+  --color-text: #ececea;
+  --color-text-muted: #98978f;
+  --color-text-faint: #68675f;
+  --color-invert-bg: #ececea;
+  --color-invert-text: #17181b;
 }
 
 * {
@@ -31,7 +31,7 @@ button {
 
 button:focus-visible,
 a:focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--color-text);
   outline-offset: 2px;
 }
 
@@ -64,8 +64,8 @@ a:focus-visible {
 .app-tabs {
   grid-area: tabs;
   display: flex;
-  align-items: stretch;
-  gap: 4px;
+  align-items: center;
+  gap: 6px;
   padding: 0 20px;
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
@@ -73,13 +73,13 @@ a:focus-visible {
 
 .app-tab {
   border: none;
-  border-bottom: 2px solid transparent;
   background: transparent;
-  padding: 0 14px;
+  border-radius: 3px;
+  padding: 6px 14px;
   font-size: 0.88rem;
   color: var(--color-text-muted);
   cursor: pointer;
-  transition: color 0.15s ease, border-color 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 .app-tab:hover {
@@ -87,16 +87,16 @@ a:focus-visible {
 }
 
 .app-tab.is-active {
-  color: var(--color-text);
+  background: var(--color-invert-bg);
+  color: var(--color-invert-text);
   font-weight: 600;
-  border-bottom-color: var(--color-accent);
 }
 
 .sidebar {
   grid-area: sidebar;
   background: var(--color-surface);
   border-right: 1px solid var(--color-border);
-  padding: 20px 0;
+  padding: 20px 12px;
   overflow-y: auto;
 }
 
@@ -107,23 +107,23 @@ a:focus-visible {
   gap: 10px;
   width: 100%;
   border: none;
-  border-left: 2px solid transparent;
+  border-radius: 4px;
   background: transparent;
   text-align: left;
-  padding: 11px 22px;
+  padding: 11px 14px;
   font-size: 0.87rem;
   color: var(--color-text);
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 .sidebar-item:hover {
-  background: var(--color-bg);
+  background: var(--color-border);
 }
 
 .sidebar-item.is-active {
-  background: var(--color-accent-soft);
-  border-left-color: var(--color-accent);
+  background: var(--color-invert-bg);
+  color: var(--color-invert-text);
   font-weight: 600;
 }
 
@@ -137,7 +137,8 @@ a:focus-visible {
 }
 
 .sidebar-item.is-active .status-badge {
-  color: var(--color-text-muted);
+  color: var(--color-invert-text);
+  opacity: 0.6;
 }
 
 .main-area {
