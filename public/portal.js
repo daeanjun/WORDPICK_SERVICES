@@ -3,8 +3,9 @@
 
   // 1단계(정적 뼈대) 범위: 실제 기능 연결 없이 목록/전환 구조만 만든다.
   // 각 기능은 README §2 2단계에서 순서대로 ④ 영역에 실제 연결될 예정.
-  // 항목 타입: 'feature'(클릭 시 ④에 패널 표시) / 'group'(하위 feature 묶음, 펼침·접힘)
-  // / 'link'(외부 페이지를 같은 창에서 여는 실제 동작 항목 — 1단계 범위 밖 아님, 지금 바로 동작).
+  // 항목 타입: 'feature'(클릭 시 ④에 "준비 중" 패널 표시) / 'group'(하위 feature 묶음,
+  // 펼침·접힘) / 'embed'(클릭 시 ④ 영역 안에 iframe으로 외부 페이지를 그대로 띄움 —
+  // 페이지 이동 없이 같은 셸 안에서 동작, 1단계 범위 밖 아님, 지금 바로 동작).
   var ICONS = {
     upload:
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>',
@@ -46,11 +47,12 @@
         { type: 'feature', id: 'translate', label: '상품명 번역기', status: 'pending', icon: 'translate' },
         { type: 'feature', id: 'train', label: '학습 데이터 수동 업로드', status: 'pending', icon: 'database' },
         {
-          type: 'link',
+          type: 'embed',
           id: 'admin',
           label: '관리자 페이지',
+          status: 'ready',
           icon: 'settings',
-          href: 'https://hs-code-tool-production.up.railway.app/admin.html'
+          embedUrl: 'https://hs-code-tool-production.up.railway.app/admin.html'
         }
       ]
     }
@@ -72,7 +74,7 @@
   sidebarToggleEl.innerHTML = ICONS.hamburger;
 
   function statusLabel(status) {
-    return status === 'ready' ? '연결됨' : '준비 중';
+    return status === 'ready' ? '연결됨' : '';
   }
 
   function findFeature(app, featureId) {
@@ -82,7 +84,7 @@
         for (var j = 0; j < item.children.length; j++) {
           if (item.children[j].id === featureId) return item.children[j];
         }
-      } else if (item.type === 'feature' && item.id === featureId) {
+      } else if ((item.type === 'feature' || item.type === 'embed') && item.id === featureId) {
         return item;
       }
     }
@@ -131,13 +133,15 @@
 
     var label = document.createElement('span');
     label.textContent = feature.label;
-
-    var badge = document.createElement('span');
-    badge.className = 'status-badge';
-    badge.textContent = statusLabel(feature.status);
-
     btn.appendChild(label);
-    btn.appendChild(badge);
+
+    var statusText = statusLabel(feature.status);
+    if (statusText) {
+      var badge = document.createElement('span');
+      badge.className = 'status-badge';
+      badge.textContent = statusText;
+      btn.appendChild(badge);
+    }
 
     btn.addEventListener('click', function () {
       state.activeFeature = feature.id;
@@ -189,34 +193,9 @@
     return wrap;
   }
 
-  function buildLink(link) {
-    var a = document.createElement('a');
-    a.className = 'sidebar-link';
-    a.href = link.href;
-
-    var label = document.createElement('span');
-    label.textContent = link.label;
-
-    var icon = document.createElement('span');
-    icon.className = 'external-icon';
-    icon.textContent = '↗';
-    icon.setAttribute('aria-hidden', 'true');
-
-    a.appendChild(label);
-    a.appendChild(icon);
-
-    return a;
-  }
-
   function buildIconItem(item) {
-    var el;
-    if (item.type === 'link') {
-      el = document.createElement('a');
-      el.href = item.href;
-    } else {
-      el = document.createElement('button');
-      el.type = 'button';
-    }
+    var el = document.createElement('button');
+    el.type = 'button';
     el.className = 'sidebar-icon-item';
     el.title = item.label;
 
@@ -235,7 +214,7 @@
         applyCollapsedState();
         renderSidebar();
       });
-    } else if (item.type === 'feature') {
+    } else {
       if (item.id === state.activeFeature) {
         el.classList.add('is-active');
       }
@@ -253,8 +232,6 @@
     app.items.forEach(function (item) {
       if (item.type === 'group') {
         sidebarEl.appendChild(buildGroup(item));
-      } else if (item.type === 'link') {
-        sidebarEl.appendChild(buildLink(item));
       } else {
         sidebarEl.appendChild(buildFeatureButton(item, false));
       }
@@ -279,6 +256,7 @@
 
   function renderMain() {
     mainAreaEl.innerHTML = '';
+    mainAreaEl.classList.remove('is-embed');
 
     if (!state.activeFeature) {
       var placeholder = document.createElement('p');
@@ -296,12 +274,18 @@
       return;
     }
 
+    if (feature.embedUrl) {
+      mainAreaEl.classList.add('is-embed');
+      var iframe = document.createElement('iframe');
+      iframe.className = 'embed-frame';
+      iframe.src = feature.embedUrl;
+      iframe.title = feature.label;
+      mainAreaEl.appendChild(iframe);
+      return;
+    }
+
     var panel = document.createElement('div');
     panel.className = 'feature-panel';
-
-    var status = document.createElement('span');
-    status.className = 'feature-status';
-    status.textContent = statusLabel(feature.status);
 
     var heading = document.createElement('h2');
     heading.textContent = feature.label;
@@ -310,7 +294,6 @@
     body.className = 'placeholder';
     body.textContent = '이 기능은 아직 이 화면에 연결되지 않았습니다(1단계: 뼈대만).';
 
-    panel.appendChild(status);
     panel.appendChild(heading);
     panel.appendChild(body);
     mainAreaEl.appendChild(panel);
