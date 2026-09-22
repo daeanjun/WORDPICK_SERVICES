@@ -254,15 +254,57 @@
     }
   }
 
+  var HOME_STEPS = [
+    ['상단(②)에서 사용할 앱을 선택합니다. 지금은 ', ['HSCT'], ' 하나뿐입니다.'],
+    [
+      '왼쪽(③) 사이드바에서 원하는 기능을 클릭합니다. ',
+      ['WGEX 주문내역 업로드'],
+      '는 클릭하면 하위 메뉴 3개가 펼쳐집니다.'
+    ],
+    [
+      '오른쪽(④) 이 영역에 선택한 기능이 표시됩니다. ',
+      ['관리자 페이지'],
+      '는 지금 바로 실제로 동작하고, 나머지는 아직 준비 중입니다.'
+    ],
+    ['사이드바 위쪽 햄버거 아이콘(', ['☰'], ')을 누르면 아이콘만 보이는 좁은 모드로 바꿀 수 있습니다.'],
+    ['왼쪽 위 ', ['WORDPICK'], ' 로고를 클릭하면 언제든 이 화면(홈)으로 돌아옵니다.']
+  ];
+
+  function renderHome() {
+    var panel = document.createElement('div');
+    panel.className = 'feature-panel home-panel';
+
+    var heading = document.createElement('h2');
+    heading.textContent = 'WORDPICK 포털 사용 방법';
+    panel.appendChild(heading);
+
+    var list = document.createElement('ol');
+    list.className = 'home-steps';
+
+    HOME_STEPS.forEach(function (segments) {
+      var li = document.createElement('li');
+      segments.forEach(function (segment) {
+        if (Array.isArray(segment)) {
+          var b = document.createElement('b');
+          b.textContent = segment[0];
+          li.appendChild(b);
+        } else {
+          li.appendChild(document.createTextNode(segment));
+        }
+      });
+      list.appendChild(li);
+    });
+
+    panel.appendChild(list);
+    mainAreaEl.appendChild(panel);
+  }
+
   function renderMain() {
     mainAreaEl.innerHTML = '';
     mainAreaEl.classList.remove('is-embed');
 
     if (!state.activeFeature) {
-      var placeholder = document.createElement('p');
-      placeholder.className = 'placeholder';
-      placeholder.textContent = '왼쪽 목록에서 기능을 선택하세요.';
-      mainAreaEl.appendChild(placeholder);
+      renderHome();
       return;
     }
 
