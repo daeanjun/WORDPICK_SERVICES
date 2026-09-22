@@ -125,7 +125,7 @@ body.sidebar-collapsed .logo {
   border: none;
   border-bottom: 2px solid transparent;
   background: transparent;
-  border-radius: 6px;
+  border-radius: 6px 6px 0 0;
   padding: 7px 14px 10px;
   margin: 0;
   transform: translateY(4px);
