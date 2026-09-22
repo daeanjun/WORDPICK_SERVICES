@@ -152,3 +152,42 @@ AskUserQuestion으로 범위 확인(여러 프로젝트 통합 확정, 단 목�
    배지·`is-active` 클래스·홈 리셋)을 assert 기반으로 검증 — 전부 통과. **단, 실제
    브라우저로 시각적 렌더링(그리드 배치·색상 등)은 이 환경에 브라우저/스크린샷 도구가
    없어 확인하지 못했다** — 사용자가 `npx serve public` 후 직접 열어보는 것을 권장한다.
+
+### 2026-09-22 (3차) — 확인용 URL 요청 → GitHub Pages 배포(저장소 Public 전환 포함)
+
+사용자가 "확인 가능한 URL은?"이라고 질문 → 처음엔 "로컬 실행 vs 지금 GitHub Pages 배포"로
+선택지를 물었고 사용자가 "지금 GitHub Pages로 공개 URL 만들기"를 선택. `gh api POST
+.../pages` 시도 결과 **"Your current plan does not support GitHub Pages for this
+repository."(422)** 오류 발생 — 2차 세션에서 Claude가 안내했던 "비공개 저장소도 Pages는
+되고 URL만 공개된다"는 설명이 **틀렸음이 실제 API 응답으로 드러남**(Free 플랜은 비공개
+저장소에 Pages 자체가 비활성화됨). 이 사실을 정정해 다시 안내하고 재확인받은 뒤, 사용자가
+"저장소를 Public으로 전환하고 Pages 진행"으로 확정 →
+1. `gh repo edit --visibility public --accept-visibility-change-consequences`로 저장소
+   공개 전환(확인됨: `gh repo view --json visibility` → `PUBLIC`).
+2. `public/` 폴더가 저장소 루트가 아니라 브랜치 기반 Pages(루트/`docs`만 지원) 불가 →
+   `.github/workflows/deploy-pages.yml` 신설(Actions 기반 배포, `master`의 `public/**`
+   변경 시 자동 배포).
+3. `gh api POST .../pages -f build_type=workflow`로 Pages 활성화 확인.
+4. 커밋·푸시 후 `gh run watch`로 워크플로가 `success`로 완료됨을 확인, `curl`로
+   `https://daeanjun.github.io/WORDPICK_SERVICES/`·`styles.css`·`portal.js` 3개 모두
+   HTTP 200 실제 응답 확인.
+
+**주의**: 이제 이 저장소는 소스 코드·커밋 이력이 전부 공개 상태다. 앞으로 API 키·실제
+고객 데이터 등 민감한 내용을 커밋하지 않도록 유의할 것.
+
+### 2026-09-22 (4차) — 포털 배색·톤 리디자인("화려하지 않지만 세련되고 집중력 있는 느낌")
+
+사용자 요청에 따라 `public/styles.css`를 채도 높은 파란색(#2f6feb) 위주 배색에서
+절제된 뉴트럴 톤(따뜻한 오프화이트 배경 `#f6f5f2` + 딥 슬레이트 네이비 포인트 컬러
+`#2e3646`)으로 전면 재작성. 주요 변경: 포인트 컬러를 배경 채움 대신 하단/좌측 얇은
+인디케이터 선과 텍스트 색으로만 절제해 사용, 알약형(pill) 배지를 소문자 대문자 변환 +
+자간을 준 무채색 라벨로 교체, `box-shadow` 전면 제거하고 1px 헤어라인 보더로만 구획,
+로고를 대문자 소문자간격(letter-spacing) 스타일로 변경. 레이아웃 구조(HTML/JS)는
+변경하지 않았다.
+
+검증: ① 중괄호 짝 맞춤(22:22) 스크립트로 CSS 구문 오류 없음 확인, ② `npx serve public`
+로컬 서버 + `curl`로 `styles.css` HTTP 200 확인. **단, 실제 브라우저에서 "세련되고
+집중력 있는 느낌"이라는 주관적 목표가 실제로 달성됐는지는 Claude가 시각적으로 확인할
+수 없었다** — 이 환경에 브라우저/스크린샷 도구가 없기 때문. 사용자가 배포된
+`https://daeanjun.github.io/WORDPICK_SERVICES/`(push 후 Actions가 자동 재배포)를 직접
+열어보고 톤이 의도에 맞는지 확인 후 피드백을 주는 것이 필요하다.

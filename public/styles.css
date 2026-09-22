@@ -1,11 +1,13 @@
 :root {
-  --color-bg: #f5f6f8;
+  --color-bg: #f6f5f2;
   --color-surface: #ffffff;
-  --color-border: #e2e5ea;
-  --color-text: #1f2430;
-  --color-text-muted: #6b7280;
-  --color-accent: #2f6feb;
-  --color-accent-bg: #eaf1ff;
+  --color-border: #e4e2db;
+  --color-border-strong: #d3d0c6;
+  --color-text: #232420;
+  --color-text-muted: #767468;
+  --color-text-faint: #a3a094;
+  --color-accent: #2e3646;
+  --color-accent-soft: #eceef1;
 }
 
 * {
@@ -15,8 +17,22 @@
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
   background: var(--color-bg);
   color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+a,
+button {
+  font-family: inherit;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
 .portal-shell {
@@ -24,8 +40,8 @@ body {
   grid-template-areas:
     'logo tabs'
     'sidebar main';
-  grid-template-columns: 220px 1fr;
-  grid-template-rows: 64px 1fr;
+  grid-template-columns: 240px 1fr;
+  grid-template-rows: 60px 1fr;
   min-height: 100vh;
 }
 
@@ -33,12 +49,14 @@ body {
   grid-area: logo;
   display: flex;
   align-items: center;
-  padding: 0 20px;
+  padding: 0 24px;
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
   border-right: 1px solid var(--color-border);
+  font-size: 0.85rem;
   font-weight: 700;
-  font-size: 1.1rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   color: var(--color-text);
   text-decoration: none;
 }
@@ -46,8 +64,8 @@ body {
 .app-tabs {
   grid-area: tabs;
   display: flex;
-  align-items: center;
-  gap: 8px;
+  align-items: stretch;
+  gap: 4px;
   padding: 0 20px;
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
@@ -55,25 +73,30 @@ body {
 
 .app-tab {
   border: none;
+  border-bottom: 2px solid transparent;
   background: transparent;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 0.95rem;
+  padding: 0 14px;
+  font-size: 0.88rem;
   color: var(--color-text-muted);
   cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.app-tab:hover {
+  color: var(--color-text);
 }
 
 .app-tab.is-active {
-  background: var(--color-accent-bg);
-  color: var(--color-accent);
+  color: var(--color-text);
   font-weight: 600;
+  border-bottom-color: var(--color-accent);
 }
 
 .sidebar {
   grid-area: sidebar;
   background: var(--color-surface);
   border-right: 1px solid var(--color-border);
-  padding: 16px 0;
+  padding: 20px 0;
   overflow-y: auto;
 }
 
@@ -81,15 +104,17 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
   border: none;
+  border-left: 2px solid transparent;
   background: transparent;
   text-align: left;
-  padding: 12px 20px;
-  font-size: 0.92rem;
+  padding: 11px 22px;
+  font-size: 0.87rem;
   color: var(--color-text);
   cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 .sidebar-item:hover {
@@ -97,47 +122,55 @@ body {
 }
 
 .sidebar-item.is-active {
-  background: var(--color-accent-bg);
-  color: var(--color-accent);
+  background: var(--color-accent-soft);
+  border-left-color: var(--color-accent);
   font-weight: 600;
-  border-right: 3px solid var(--color-accent);
 }
 
 .sidebar-item .status-badge {
-  font-size: 0.72rem;
-  color: var(--color-text-muted);
-  background: var(--color-bg);
-  border-radius: 999px;
-  padding: 2px 8px;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
   white-space: nowrap;
 }
 
 .sidebar-item.is-active .status-badge {
-  background: #ffffff;
+  color: var(--color-text-muted);
 }
 
 .main-area {
   grid-area: main;
-  padding: 32px;
+  padding: 40px 48px;
   overflow-y: auto;
 }
 
 .placeholder {
   color: var(--color-text-muted);
-  font-size: 0.95rem;
+  font-size: 0.92rem;
+}
+
+.feature-panel {
+  max-width: 640px;
 }
 
 .feature-panel h2 {
-  margin: 0 0 8px;
-  font-size: 1.3rem;
+  margin: 0 0 14px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .feature-panel .feature-status {
   display: inline-block;
-  margin-bottom: 16px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  background: var(--color-accent-bg);
-  color: var(--color-accent);
+  margin-bottom: 18px;
+  padding: 3px 10px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 3px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
 }
