@@ -131,6 +131,12 @@
       '최종 HS Code'
     ];
 
+    // 웹페이지에서는 #/상품명(U열)/도착국/HSK(10자리)/발송국가 HS코드/최종 HS Code 6개만
+    // 기본으로 보이는 게 더 효과적이라는 사용자 요청(2026-09-28)에 따라, 나머지(주문번호/
+    // 품목주문번호/상품명(원문)/제안 HS Code(6자리)/신뢰도 등급)는 처음부터 숨겨두고
+    // 필요할 때 +버튼으로 펼쳐 보게 한다.
+    var DEFAULT_HIDDEN_COLUMNS = [1, 2, 3, 6, 9];
+
     function renderTable(rows) {
       tableContainer.innerHTML = '';
       if (!rows.length) {
@@ -211,6 +217,13 @@
       tableContainer.appendChild(scrollWrap);
 
       makeColumnsResizable(table);
+
+      // 기본 숨김 컬럼은 폭 측정(makeColumnsResizable)이 끝난 뒤에 숨긴다 — 숨긴 채로
+      // 폭을 재면 offsetWidth가 0이 되어, 나중에 +버튼으로 다시 펼쳤을 때 폭이 0인 채로
+      // 나오는 문제가 생기기 때문이다.
+      DEFAULT_HIDDEN_COLUMNS.forEach(function (index) {
+        setColumnVisible(table, index, false);
+      });
     }
 
     // 표 위에 컬럼마다 +/- 토글 버튼을 두어, 필요 없는 열을 숨겼다가 다시 꺼낼 수 있게 한다.
@@ -221,8 +234,10 @@
         var btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'os-col-toggle-btn';
+        var hiddenByDefault = DEFAULT_HIDDEN_COLUMNS.indexOf(index) !== -1;
+        if (hiddenByDefault) btn.classList.add('is-hidden');
 
-        var sign = el('span', 'os-col-toggle-sign', '−');
+        var sign = el('span', 'os-col-toggle-sign', hiddenByDefault ? '+' : '−');
         var text = el('span', null, label);
         btn.appendChild(sign);
         btn.appendChild(text);

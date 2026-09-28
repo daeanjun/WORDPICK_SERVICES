@@ -403,10 +403,17 @@ body.sidebar-collapsed .sidebar {
 }
 
 .os-button-secondary {
-  background: transparent;
-  color: var(--color-text);
-  border: 1px solid var(--color-border-strong);
+  /* WGEX 로고의 주황(번트오렌지)을 따오되, 기존 경고색(--os-warn, 옅은 호박색)과
+     헷갈리지 않도록 더 진하고 붉은 기가 도는 톤으로 구분했다(2026-09-28 사용자 제안). */
+  background: #d9622a;
+  color: #17181b;
+  border: none;
+  font-weight: 600;
   margin-top: 18px;
+}
+
+.os-button-secondary:hover {
+  background: #e57238;
 }
 
 .os-progress-wrap {
