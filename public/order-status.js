@@ -106,6 +106,20 @@
       progressFill.style.width = '0%';
     }
 
+    var TABLE_COLUMNS = [
+      '#',
+      '주문번호',
+      '품목주문번호',
+      '상품명(원문)',
+      '상품명(U열)',
+      '도착국',
+      '제안 HS Code(6자리)',
+      'HSK(10자리)',
+      '발송국가 HS코드',
+      '신뢰도 등급',
+      '최종 HS Code'
+    ];
+
     function renderTable(rows) {
       tableContainer.innerHTML = '';
       if (!rows.length) {
@@ -117,19 +131,7 @@
       table.className = 'os-table';
       var thead = document.createElement('thead');
       var headRow = document.createElement('tr');
-      [
-        '#',
-        '주문번호',
-        '품목주문번호',
-        '상품명(원문)',
-        '상품명(U열)',
-        '도착국',
-        '제안 HS Code(6자리)',
-        'HSK(10자리)',
-        '발송국가 HS코드',
-        '신뢰도 등급',
-        '최종 HS Code'
-      ].forEach(function (label) {
+      TABLE_COLUMNS.forEach(function (label) {
         headRow.appendChild(el('th', null, label));
       });
       thead.appendChild(headRow);
@@ -182,9 +184,91 @@
       });
       table.appendChild(tbody);
 
+      tableContainer.appendChild(buildColumnToggles(table));
+
       var scrollWrap = el('div', 'os-table-scroll');
       scrollWrap.appendChild(table);
       tableContainer.appendChild(scrollWrap);
+
+      makeColumnsResizable(table);
+    }
+
+    // 표 위에 컬럼마다 +/- 토글 버튼을 두어, 필요 없는 열을 숨겼다가 다시 꺼낼 수 있게 한다.
+    function buildColumnToggles(table) {
+      var toolbar = el('div', 'os-col-toggles');
+
+      TABLE_COLUMNS.forEach(function (label, index) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'os-col-toggle-btn';
+
+        var sign = el('span', 'os-col-toggle-sign', '−');
+        var text = el('span', null, label);
+        btn.appendChild(sign);
+        btn.appendChild(text);
+
+        btn.addEventListener('click', function () {
+          var hidden = btn.classList.toggle('is-hidden');
+          sign.textContent = hidden ? '+' : '−';
+          setColumnVisible(table, index, !hidden);
+        });
+
+        toolbar.appendChild(btn);
+      });
+
+      return toolbar;
+    }
+
+    function setColumnVisible(table, columnIndex, visible) {
+      var rows = table.querySelectorAll('tr');
+      rows.forEach(function (row) {
+        var cell = row.children[columnIndex];
+        if (cell) cell.style.display = visible ? '' : 'none';
+      });
+    }
+
+    // 열 너비를 사용자가 드래그로 늘였다 줄였다 할 수 있게 만든다(글자는 잘려도 됨,
+    // 줄바꿈되지 않고 말줄임표로 처리 — CSS의 white-space:nowrap+text-overflow:ellipsis).
+    // table-layout:auto 상태로 한 번 렌더링된 뒤라야 각 th의 자연스러운 너비를 측정할 수
+    // 있으므로, DOM에 붙인 다음 offsetWidth를 읽어 고정폭으로 바꾸고 나서 fixed로 전환한다.
+    function makeColumnsResizable(table) {
+      var ths = table.querySelectorAll('thead th');
+      ths.forEach(function (th) {
+        th.style.width = th.offsetWidth + 'px';
+      });
+      table.classList.add('os-table-fixed');
+
+      ths.forEach(function (th) {
+        var handle = document.createElement('span');
+        handle.className = 'os-col-resizer';
+
+        var dragging = false;
+        var startX = 0;
+        var startWidth = 0;
+
+        function onMouseMove(event) {
+          if (!dragging) return;
+          var delta = event.clientX - startX;
+          th.style.width = Math.max(32, startWidth + delta) + 'px';
+        }
+
+        function onMouseUp() {
+          dragging = false;
+          document.removeEventListener('mousemove', onMouseMove);
+          document.removeEventListener('mouseup', onMouseUp);
+        }
+
+        handle.addEventListener('mousedown', function (event) {
+          event.preventDefault();
+          dragging = true;
+          startX = event.clientX;
+          startWidth = th.offsetWidth;
+          document.addEventListener('mousemove', onMouseMove);
+          document.addEventListener('mouseup', onMouseUp);
+        });
+
+        th.appendChild(handle);
+      });
     }
 
     function upload() {
