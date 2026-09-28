@@ -528,3 +528,46 @@ HTTP 200 확인, ④ jsdom으로 신규 시나리오까지 포함해 14개 asser
 (추정이 아님). **단, 이 조치가 사용자의 실제 브라우저에서 문제를 완전히 해결하는지는
 Claude가 직접 확인할 수 없다** — 사용자가 배포 후 새로고침해 텍스트가 정상적으로
 보이는지 확인해 줘야 한다.
+
+### 2026-09-28 — 17차 진단이 틀렸음이 드러남: 진짜 원인은 CSS 우선순위 충돌(specificity 동률)
+
+6일 뒤(2026-09-22 → 2026-09-28), 캐시가 완전히 만료되고도 남을 시간이 지났는데도
+사용자가 "아직도 호버하면 하얗게만 나오고 반전이 안 됨"이라고 재확인 — **17차의
+"CDN 캐시 전파 지연" 진단은 틀렸다.** 이번엔 추측하지 않고 Playwright로 실제 Chromium을
+띄워 라이브 페이지의 `getComputedStyle()`을 직접 측정해 근본 원인을 확정했다:
+
+- 호버 전: `background: transparent`, `color: rgb(236,236,234)`(밝음) — 정상.
+- 호버 후: `background: rgb(236,236,234)`(밝음, 정상) / **`color: rgb(236,236,234)`
+  (밝음 그대로, 안 바뀜!)** — 배경만 밝아지고 글자색은 그대로라 흰 배경에 흰 글자로
+  겹쳐 안 보였던 것.
+
+**근본 원인**: HSCT 탭은 앱이 1개뿐이라 항상 `.is-active` 상태다. 호버하면
+`.app-tab:hover`와 `.app-tab.is-active`가 **동시에** 같은 요소에 적용되는데, 두 선택자의
+specificity가 완전히 같다(둘 다 클래스 2개, `(0,2,0)`). CSS는 specificity가 같으면
+스타일시트에 **나중에 적힌 규칙이 이긴다** — `.is-active`가 `:hover`보다 뒤에 적혀
+있어서, `.is-active`의 `color: var(--color-text)`(밝음)가 `:hover`의
+`color: var(--color-invert-text)`(어두움)를 매번 덮어썼다. `background`는 `.is-active`
+쪽에 정의돼 있지 않아 충돌이 없었기 때문에 그것만 정상 동작했다.
+
+**왜 지금까지 못 잡았나(재발 방지 핵심)**: jsdom 기반 단위 테스트(1~16차 내내 사용)는
+DOM 구조·클래스 이름만 확인하고 **실제로 계산된 CSS 값(computed style)은 전혀 검사하지
+않는다** — 즉 "코드가 문법적으로 맞는가"만 검증했지 "실제로 그렇게 보이는가"는 한 번도
+검증하지 못했다. 이런 종류의 specificity 충돌 버그는 jsdom으로는 원천적으로 잡을 수
+없다.
+
+**수정**: `.app-tab.is-active:hover { color: var(--color-invert-text); }` 규칙을
+추가해 이 조합에서만 명시적으로 이기도록 함(specificity `(0,3,0)`으로 둘 다보다 높음).
+
+**영구 자산화**: 이번 검증에 쓴 Playwright 스크립트를 `scripts/verify-visual.js`로
+저장소에 영구 고정했다 — 호버 전/후 배경·글자색의 실제 밝기 차이(luminance)를 계산해
+40 미만이면 실패 처리하는 자동 회귤 테스트다. 다음에 비슷한 색 관련 버그가 생기면
+`node scripts/verify-visual.js <URL>`로 즉시 재현·검증할 수 있다(Node 의존성은 이
+저장소에 커밋하지 않으므로, 실행 전 별도 폴더에서 `npm install playwright &&
+npx playwright install chromium` 한 번 필요, 스크립트 상단 주석에 명시).
+
+검증: ① 로컬 서버 + Playwright로 수정 전 재현(배경/글자색이 같아 밝기 차이 0에
+가까움을 실제로 확인), ② 수정 후 로컬에서 재실행해 `scripts/verify-visual.js`가
+PASS(밝기 차이 211.9)로 통과함을 확인 — **이번엔 자체 제작 픽스처가 아니라 실제
+렌더링된 페이지의 computed style로 직접 검증했다.** ③ 캐시 버스팅 규칙에 따라
+`index.html`의 `?v=17` → `?v=18`로 함께 올림. ④ 중괄호 짝 맞춤(49:49)으로 CSS 구문
+오류 없음 확인.
