@@ -132,6 +132,7 @@
     }
 
     var label = document.createElement('span');
+    label.className = 'sidebar-item-label';
     label.textContent = feature.label;
     btn.appendChild(label);
 
@@ -164,6 +165,7 @@
     header.setAttribute('aria-expanded', String(expanded));
 
     var headerLabel = document.createElement('span');
+    headerLabel.className = 'sidebar-item-label';
     headerLabel.textContent = group.label;
 
     var chevron = document.createElement('span');

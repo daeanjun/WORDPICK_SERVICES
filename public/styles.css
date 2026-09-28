@@ -187,7 +187,16 @@ body.sidebar-collapsed .logo {
   font-weight: 600;
 }
 
+.sidebar-item-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
 .sidebar-item .status-badge {
+  flex: 0 0 auto;
   font-size: 0.62rem;
   font-weight: 600;
   letter-spacing: 0.06em;
@@ -351,7 +360,10 @@ body.sidebar-collapsed .sidebar {
 }
 
 .order-status-feature {
-  max-width: 900px;
+  /* 고정 900px이면 넓은 화면에서 오른쪽이 텅 비어 보인다는 피드백 반영 —
+     결과 표가 데이터 위주라 화면이 커질수록 더 넓게 쓰는 게 유리해서,
+     뷰포트 폭에 비례해 늘어나되 지나치게 길어지지 않도록 상한만 둔다. */
+  max-width: min(1800px, 94%);
 }
 
 .order-status-feature h2 {
