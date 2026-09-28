@@ -862,4 +862,16 @@ WGEX 관계자에게 먼저 보여줄 내부 테스트용 배포를 GitHub Pages
 스크립트가 전혀 없음(0건)을 확인 — 평소 동작(GitHub Pages와 동일)에 회귀가 없음을 실측
 확인.
 
-**상세는 다음 작업(실제 레일웨이 배포·도메인 연결)에서 이어서 기록.**
+**실제 배포 결과**: 기존 빈 레일웨이 프로젝트("WORDPICK SERVICES", ID `369e5daa-0f0f-445f-b3c7-aa7afa6236ce`)에
+`railway up`으로 서비스 신설·배포, `MENU_SCOPE=wgex` 환경변수 설정, `railway domain`으로 도메인
+발급까지 완료 — **`https://wordpick-services-production.up.railway.app`**. 사용자가 요청한
+주소 형태는 "portal.wordpick.railway.app"였으나, 레일웨이 자동 생성 도메인은
+`<서비스명>-<환경>.up.railway.app` 구조만 지원해(`.railway.app` 앞에 여러 단계 서브도메인을
+자유롭게 못 붙임) 요청하신 정확한 형태는 만들 수 없었다 — 서비스 이름을 바꾸면 도메인의
+`wordpick-services` 부분만 바뀔 수 있음(예: 서비스명을 "wordpick-portal"로 바꾸면
+`wordpick-portal-production.up.railway.app`)을 사용자에게 안내하고 확인 대기 중.
+**실제 배포 주소에 Playwright로 접속해 사이드바 최상위 항목이 정확히 `['WGEX 주문내역
+업로드']` 하나뿐임을 최종 확인**(로컬 재현과 동일 결과, 스크린샷 확인).
+
+**남은 것**: GitHub Pages는 이번 변경과 무관하게 그대로 전체 메뉴로 운영 중(사용자 확인사항
+①에 따름) — 실제 운영 전환 여부는 아직 미결정.
