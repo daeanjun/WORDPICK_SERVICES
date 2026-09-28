@@ -58,6 +58,15 @@
     }
   };
 
+  // 2026-09-28 신설 — 레일웨이 내부 테스트 배포 전용(server.js가 MENU_SCOPE=wgex일 때만
+  // window.WORDPICK_MENU_SCOPE를 주입). GitHub Pages는 이 값이 항상 비어있으므로 영향 없음 —
+  // 전체 메뉴가 그대로 보인다. WGEX 관계자에게 먼저 "WGEX 주문내역 업로드" 그룹만 보여주기 위함.
+  if (window.WORDPICK_MENU_SCOPE === 'wgex') {
+    APPS.hsct.items = APPS.hsct.items.filter(function (item) {
+      return item.id === 'wgex-order';
+    });
+  }
+
   var state = {
     activeApp: 'hsct',
     activeFeature: null,

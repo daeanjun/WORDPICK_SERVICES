@@ -830,3 +830,36 @@ Playwright 재현은 생략(구조/로직 변경 없음). 캐시 버스팅 규�
 
 검증: 중괄호 짝 맞춤(82:82)으로 `styles.css` 구문 오류 없음. 캐시 버스팅 규칙에 따라
 `styles.css?v=23`→`?v=24`로 올림.
+
+### 2026-09-28 (26차) — Railway 내부 테스트 배포 신설(WGEX 그룹만 노출하는 메뉴 스코프)
+
+사용자 요청: "레일웨이에 다른 메뉴는 노출하지 말고, WGEX 주문내역 업로드만 배포해볼까?" —
+WGEX 관계자에게 먼저 보여줄 내부 테스트용 배포를 GitHub Pages와 별도로 만들기로 함
+(AskUserQuestion으로 확인: ①내부 테스트용, GitHub Pages는 그대로 유지 ②메뉴 숨김은 이번
+레일웨이 배포에만 적용 ③레일웨이 프로젝트는 새로 필요하다고 답변받았으나, 실제
+`railway status`로 확인해보니 계정에 이미 빈 "WORDPICK SERVICES" 프로젝트가 존재해 그
+사실을 먼저 알리고 재확인 → 기존 프로젝트를 그대로 쓰기로 확정).
+
+**구현 — 정적 사이트에 최소한의 서버 한 겹만 추가**(README §3.2에서 미뤄뒀던 Node/Express
+전환을 전면 도입하는 게 아니라, 메뉴 스코프 분기만을 위한 최소 서버):
+- `server.js`(신규, 외부 의존성 없이 Node 내장 `http`/`fs`만 사용): `public/`을 정적 서빙하되,
+  `index.html`만은 환경변수 `MENU_SCOPE=wgex`가 설정된 경우에 한해 `<head>` 바로 뒤에
+  `window.WORDPICK_MENU_SCOPE = "wgex"` 스크립트를 주입한다. 환경변수가 없으면 원본
+  `index.html`을 바이트 그대로 반환(실측 확인, 아래 검증 참고) — **GitHub Pages는 이
+  서버를 거치지 않고 `public/`을 그대로 서빙하므로 이번 변경과 무관하게 항상 전체 메뉴가
+  보인다.**
+- `package.json`(신규): `"start": "node server.js"`만 있는 최소 구성, 레일웨이가 Node
+  프로젝트로 자동 인식하게 함.
+- `public/portal.js`: `APPS` 정의 직후에 `window.WORDPICK_MENU_SCOPE === 'wgex'`이면
+  `APPS.hsct.items`를 `wgex-order` 그룹 하나만 남기도록 필터링하는 조건 추가 — 이 값이
+  없는 평소(GitHub Pages)에는 전혀 영향 없음.
+
+**검증**: ① `node --check`로 `server.js`·`portal.js` 문법 오류 없음. ② 로컬에서
+`MENU_SCOPE=wgex node server.js`로 실행 후 `curl`로 `index.html` 응답에 주입 스크립트가
+실제로 포함됨을 확인. ③ **Playwright로 실제 브라우저 렌더링까지 재현** — 사이드바 최상위
+항목이 정확히 `['WGEX 주문내역 업로드']` 하나뿐임을 확인(스크린샷으로 사용자가 보여준
+캡처와 동일한 모습 확인). ④ `MENU_SCOPE` 없이 서버를 다시 띄워 `index.html` 응답에 주입
+스크립트가 전혀 없음(0건)을 확인 — 평소 동작(GitHub Pages와 동일)에 회귀가 없음을 실측
+확인.
+
+**상세는 다음 작업(실제 레일웨이 배포·도메인 연결)에서 이어서 기록.**

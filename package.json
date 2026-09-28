@@ -1,0 +1,12 @@
+{
+  "name": "wordpick-services-portal",
+  "private": true,
+  "version": "1.0.0",
+  "description": "WORDPICK 포털 — HSCT 등 통합 UI 셸(정적 프론트엔드 + 레일웨이 전용 메뉴 스코프 서버)",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
