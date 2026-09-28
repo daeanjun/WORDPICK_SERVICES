@@ -29,7 +29,7 @@
           label: 'WGEX 주문내역 업로드',
           icon: 'upload',
           children: [
-            { id: 'order-status', label: 'DHOLIC 주문내역 업로드', status: 'pending' },
+            { id: 'order-status', label: 'DHOLIC 주문내역 업로드', status: 'ready' },
             {
               id: 'legacy-upload',
               label: 'LEGACY FORM',
@@ -263,6 +263,8 @@
     ],
     [
       '오른쪽(④) 이 영역에 선택한 기능이 표시됩니다. ',
+      ['DHOLIC 주문내역 업로드'],
+      '와 ',
       ['관리자 페이지'],
       '는 지금 바로 실제로 동작하고, 나머지는 아직 준비 중입니다.'
     ],
@@ -323,6 +325,11 @@
       iframe.src = feature.embedUrl;
       iframe.title = feature.label;
       mainAreaEl.appendChild(iframe);
+      return;
+    }
+
+    if (feature.id === 'order-status' && window.OrderStatusFeature) {
+      window.OrderStatusFeature.render(mainAreaEl);
       return;
     }
 

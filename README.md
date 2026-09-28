@@ -109,28 +109,36 @@ WORDPICK SERVICES/
 ├── README.md          # 이 문서
 ├── .github/workflows/deploy-pages.yml  # GitHub Pages 자동 배포(§2.2)
 └── public/
-    ├── index.html      # 4분할 셸의 정적 골격(①로고+햄버거 토글 ②앱탭 ③사이드바 ④메인)
-    ├── styles.css      # 새로 만든 스타일시트(HSCT의 styles.css와 무관, CSS Grid 4분할,
-                         # 다크 테마 + 사이드바 접힘/아이콘 모드 포함)
-    └── portal.js       # APPS 데이터(HSCT 탭 1개, 항목 4개: group 1(하위 3개)+feature 2+
-                         # embed 1)를 기반으로 탭·사이드바(펼침/아이콘 전용 2가지 모드)·
-                         # 메인 영역을 렌더링/전환하는 순수 JS. 서버 호출은 아직 전혀
-                         # 없다(1단계 범위 밖) — 단 "관리자 페이지"만 예외로, HSCT 운영
-                         # 서버의 admin.html을 ④ 영역 안에 iframe으로 띄우는 실제 동작.
+    ├── index.html        # 4분할 셸의 정적 골격(①로고+햄버거 토글 ②앱탭 ③사이드바 ④메인)
+    ├── styles.css        # 새로 만든 스타일시트(HSCT의 styles.css와 무관, CSS Grid 4분할,
+                           # 다크 테마 + 사이드바 접힘/아이콘 모드 + order-status 전용 os-* 포함)
+    ├── portal.js         # APPS 데이터(HSCT 탭 1개, 항목 4개: group 1(하위 3개)+feature 2+
+                           # embed 1)를 기반으로 탭·사이드바(펼침/아이콘 전용 2가지 모드)·
+                           # 메인 영역을 렌더링/전환하는 순수 JS. feature.id === 'order-status'는
+                           # window.OrderStatusFeature로 위임(18차), 나머지는 아직 서버 호출 없음.
+    └── order-status.js   # 2단계 첫 실제 연결(18차): DHOLIC 주문내역 업로드(HSCT의
+                           # order-status)를 HSCT 운영 서버와 크로스오리진으로 직접 통신하는
+                           # 독립 모듈. window.OrderStatusFeature.render(container)로 노출.
 ```
 
-- 서버 로직은 아직 없다(1단계는 순수 정적 파일뿐). 실행하려면 아무 정적 서버로 `public/`
-  폴더를 서빙하면 된다 — 예: `npx serve public`.
-- 사이드바 항목 구조(8차 이후 확정, §5의 8/11차 작업 로그 참고):
-  - **WGEX 주문내역 업로드**(그룹, 펼침/접힘) → DHOLIC 주문내역 업로드(`order-status`) /
-    LEGACY FORM(`legacy-upload`) / QUERY DATA(`order-export`)
+- 서버 로직은 아직 없다(1단계는 순수 정적 파일뿐, 2단계부터는 크로스오리진으로 HSCT
+  운영 서버를 직접 호출). 실행하려면 아무 정적 서버로 `public/` 폴더를 서빙하면 된다 —
+  예: `npx serve public`.
+- 사이드바 항목 구조(8차 이후 확정, §5의 8/11/18차 작업 로그 참고):
+  - **WGEX 주문내역 업로드**(그룹, 펼침/접힘):
+    - **DHOLIC 주문내역 업로드**(`order-status`, `status: 'ready'`) — 18차부터 실제
+      연결됨. 클릭하면 `window.OrderStatusFeature.render()`가 업로드 폼·진행률 바·결과
+      표·다운로드 버튼을 ④ 영역에 그린다. `https://hs-code-tool-production.up.railway.app`의
+      `/api/upload/order-status`(NDJSON 스트리밍)·`/api/download`를 크로스오리진으로
+      직접 호출.
+    - LEGACY FORM(`legacy-upload`), QUERY DATA(`order-export`) — 아직 `status: 'pending'`.
   - **상품명 번역기**(`translate`), **학습 데이터 수동 업로드**(`train`) — 둘 다
     `status: 'pending'`, 클릭하면 ④ 영역에 "아직 연결되지 않았습니다" 안내만 표시.
     `status`가 `pending`인 항목은 사이드바에 별도 배지를 표시하지 않는다(11차에서
     "준비 중" 문구 제거).
   - **관리자 페이지**(`admin`, `type: 'embed'`, `status: 'ready'`) — 클릭하면 페이지
     이동 없이 ④ 영역 안에 `https://hs-code-tool-production.up.railway.app/admin.html`이
-    iframe으로 그대로 뜬다. 유일하게 "연결됨" 배지가 붙는 항목.
+    iframe으로 그대로 뜬다.
 - 사이드바는 상단 햄버거 버튼으로 펼침(텍스트+배지) ↔ 아이콘 전용(폭 68px) 모드를
   전환할 수 있다. 아이콘 전용 모드에서는 그룹(WGEX)·feature 2개·embed 1개, 총 4개만
   아이콘으로 보이고, 그룹 아이콘을 클릭하면 자동으로 펼침 모드로 돌아가 하위 항목을
@@ -571,3 +579,60 @@ PASS(밝기 차이 211.9)로 통과함을 확인 — **이번엔 자체 제작 �
 렌더링된 페이지의 computed style로 직접 검증했다.** ③ 캐시 버스팅 규칙에 따라
 `index.html`의 `?v=17` → `?v=18`로 함께 올림. ④ 중괄호 짝 맞춤(49:49)으로 CSS 구문
 오류 없음 확인.
+
+### 2026-09-28 (18차) — 2단계 시작: DHOLIC 주문내역 업로드(order-status) 실제 연결
+
+사용자 지시: "색상반전도 처리 되었으니, DHOLIC 주문내역 업로드를 연결해보자" → 이어서
+"기능을 연결하되, 앱서비스 레이아웃과 색상에 맞게 변형되어야 할 것 같아"(HSCT 원본
+화면을 그대로 iframe/복붙하지 말고, 이 포털의 다크 테마·톤에 맞게 새로 짜라는 의미로
+반영). §2.3에서 원래 예정했던 순서(발주 데이터 엑셀 업로드부터)와 다르게, 사용자가
+지금 이 시점에 원한 순서대로 `order-status`(DHOLIC 주문내역 업로드)를 먼저 연결한다.
+
+**구현 전 조사**: HSCT `public/app.js`의 `uploadOrderStatus()`/`downloadOrderStatus()`/
+`renderOrderStatusTable()`와 `server.js`의 `POST /api/upload/order-status` 핸들러를
+직접 읽고 실제 계약을 확인했다 — 업로드는 NDJSON 스트리밍 응답(`{type:'start'}` →
+`{type:'progress', done, total, etaMs}` 반복 → `{type:'done', rows}` 또는
+`{type:'error'}`)이고, 다운로드는 `POST /api/download`에
+`{rows, format:'order-status'}`를 보내 엑셀 blob을 받는 방식.
+
+**신규 파일** `public/order-status.js`: HSCT 원본 로직을 그대로 가져오되(파싱·표시
+컬럼·신뢰도 라벨 등 데이터 계약은 동일), UI는 이 포털의 다크 테마 토큰
+(`var(--color-*)`)으로 완전히 새로 짰다 — 업로드 영역·진행률 바·결과 표·다운로드
+버튼 전부 `os-*` 클래스로 신규 스타일링(`styles.css`에 추가). API 호출은 절대경로
+(`https://hs-code-tool-production.up.railway.app`)로 크로스오리진 호출.
+`portal.js`에서 `feature.id === 'order-status'`일 때 기존 "아직 연결되지 않았습니다"
+안내 대신 `window.OrderStatusFeature.render(mainAreaEl)`로 위임하도록 분기 추가,
+사이드바 상태도 `pending` → `ready`("연결됨" 배지)로 변경. `index.html`에
+`order-status.js` 스크립트 태그 추가, 캐시 버스팅 규칙에 따라 세 파일 모두
+`?v=19`로 올림.
+
+**검증(2단계):**
+1. `node --check`로 `portal.js`·`order-status.js` 문법 오류 없음, 중괄호 짝 맞춤
+   (72:72)으로 `styles.css` 구문 오류 없음 확인.
+2. jsdom + 가짜 NDJSON 스트림(fetch를 모킹)으로 18개 assert 전체 통과 — DHOLIC
+   사이드바 항목이 "연결됨" 배지로 표시됨, 클릭 시 일반 "준비 중" 패널이 아니라
+   실제 업로드 UI가 렌더링됨, 파일 선택 전/후 업로드 버튼 활성화 전환, 업로드 클릭 시
+   정확한 절대 URL(`.../api/upload/order-status`)로 `POST`+`FormData` 호출, 스트리밍
+   결과로 표 2행 렌더링, 미매칭 행에 `os-row-unverified` 클래스 부여, "최종 HS Code"
+   입력칸 수정이 실제 상태에 반영됨, 다운로드 클릭 시 정확한 URL(`.../api/download`)로
+   수정된 값을 포함한 JSON 전송, 다른 기능 봤다가 돌아와도 결과 표 유지.
+3. **실제 HSCT 운영 서버를 상대로 한 진짜 크로스오리진 스모크 테스트**: 유효한
+   "AI분석실패" 실데이터 파일이 없어(이 저장소·`E:\Tools\HScodeTOOL`에 order-status
+   48컬럼 형식의 실제 샘플이 없음을 먼저 확인함) 완전한 해피패스는 검증하지
+   못했지만, Playwright로 실제 Chromium을 `http://localhost:4192`(HSCT와 무관한
+   진짜 별도 출처)에서 띄우고 일부러 잘못된 파일을 실제 운영 주소
+   (`https://hs-code-tool-production.up.railway.app/api/upload/order-status`)로
+   크로스오리진 `POST`했다 — 결과: CORS 차단 없이 실제 서버가 파일을 받아 처리해서
+   진짜 검증 오류(`"주문내역 48컬럼 양식을 인식할 수 없습니다..."`, HTTP 400)를
+   그대로 돌려받았다. 이는 CORS·FormData 크로스오리진 업로드 경로 자체가 실제로
+   동작함을 자체 제작 픽스처가 아닌 실제 서버 응답으로 증명한다.
+
+**한계(솔직히 밝힘)**: 실제 "AI분석실패" 유효 데이터로 업로드 → 크롤링 → 결과표 →
+다운로드까지의 전체 해피패스는 Claude가 검증하지 못했다 — 진짜 주문내역 48컬럼
+샘플 파일이 없기 때문이다. 크로스오리진 다운로드 응답의 `Content-Disposition`
+헤더도 HSCT 서버가 `Access-Control-Expose-Headers`로 노출하지 않고 있어(코드에서
+직접 확인, 설정된 곳 없음) 브라우저에서 읽지 못할 가능성이 높다 — 이 경우
+파일명이 서버가 의도한 국가별 이름 대신 고정 파일명(`order-status-hs-mapping.xlsx`)
+으로 대체되며, 다운로드 자체는 정상 동작한다. 사용자가 실제 주문내역 파일로 직접
+업로드해 보고, 결과가 올바른지, 파일명이 신경 쓰이는 수준인지 확인해 주는 것이
+필요하다.

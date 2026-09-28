@@ -349,3 +349,142 @@ body.sidebar-collapsed .sidebar {
   color: var(--color-text);
   font-weight: 600;
 }
+
+.order-status-feature {
+  max-width: 900px;
+}
+
+.order-status-feature h2 {
+  margin: 0 0 10px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.os-upload-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.os-file-input {
+  color: var(--color-text);
+  font-size: 0.85rem;
+}
+
+.os-button {
+  border: none;
+  border-radius: 6px;
+  padding: 9px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--color-invert-bg);
+  color: var(--color-invert-text);
+}
+
+.os-button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.os-button-secondary {
+  background: transparent;
+  color: var(--color-text);
+  border: 1px solid var(--color-border-strong);
+  margin-top: 18px;
+}
+
+.os-progress-wrap {
+  margin: 12px 0;
+}
+
+.os-progress-bar {
+  width: 100%;
+  max-width: 420px;
+  height: 8px;
+  background: var(--color-border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.os-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--color-text);
+  transition: width 0.2s ease;
+}
+
+.os-progress-text {
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.os-message {
+  margin: 14px 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.os-message b {
+  color: var(--color-text);
+}
+
+.os-message .os-warn {
+  color: #e8a33d;
+}
+
+.os-table-container {
+  margin-top: 16px;
+}
+
+.os-table-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.os-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.os-table th,
+.os-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+}
+
+.os-table thead th {
+  background: var(--color-border);
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.os-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.os-row-unverified {
+  background: rgba(232, 163, 61, 0.08);
+}
+
+.os-cell-input {
+  width: 110px;
+  padding: 5px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 0.8rem;
+}
+
+.os-cell-input.os-needs-input {
+  border-color: #e8a33d;
+}
