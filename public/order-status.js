@@ -251,10 +251,15 @@
     // 줄바꿈되지 않고 말줄임표로 처리 — CSS의 white-space:nowrap+text-overflow:ellipsis).
     // table-layout:auto 상태로 한 번 렌더링된 뒤라야 각 th의 자연스러운 너비를 측정할 수
     // 있으므로, DOM에 붙인 다음 offsetWidth를 읽어 고정폭으로 바꾸고 나서 fixed로 전환한다.
+    // 실제 상품명(원문/U열)처럼 긴 한글 텍스트가 들어오면 이 "자연스러운 너비"가 매우 커져서,
+    // 표 전체 폭이 화면보다 넓어지고 "최종 HS Code" 같은 오른쪽 열이 화면 밖으로 밀려나는
+    // 문제가 실제 데이터로 확인됐다(글자가 잘려도 된다고 이미 안내했으므로, 초기 폭에
+    // 상한을 둬 우선 화면 안에 최대한 들어오게 하고, 필요하면 드래그로 넓히게 한다).
+    var MAX_INITIAL_COLUMN_WIDTH = 92;
     function makeColumnsResizable(table) {
       var ths = table.querySelectorAll('thead th');
       ths.forEach(function (th) {
-        th.style.width = th.offsetWidth + 'px';
+        th.style.width = Math.min(th.offsetWidth, MAX_INITIAL_COLUMN_WIDTH) + 'px';
       });
       table.classList.add('os-table-fixed');
 
