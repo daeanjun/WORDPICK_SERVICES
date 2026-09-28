@@ -37,6 +37,17 @@
     return s.replace(/\D/g, '');
   }
 
+  // "최종 HS Code" 입력란은 6자리(호 수준, 예: 491194/4911.94)와 10자리(HSK 세분류까지,
+  // 예: 4911949000/4911.94-9000) 둘 다 받되, 점·대시가 있든 없든 자리수만 맞으면 동일하게
+  // 인식해 "XXXX.XX" 또는 "XXXX.XX-XXXX" 형식으로 통일한다. 그 외 자리수는 사람이 오타를
+  // 냈을 가능성이 있으므로 강제로 포맷하지 않고 그대로 두되 주의 표시만 한다.
+  function normalizeFinalHsCode(raw) {
+    var digits = String(raw || '').replace(/\D/g, '');
+    if (digits.length === 6) return { value: digits.slice(0, 4) + '.' + digits.slice(4), validLength: true };
+    if (digits.length === 10) return { value: digits.slice(0, 4) + '.' + digits.slice(4, 6) + '-' + digits.slice(6), validLength: true };
+    return { value: String(raw || '').trim(), validLength: false };
+  }
+
   function el(tag, className, text) {
     var node = document.createElement(tag);
     if (className) node.className = className;
@@ -172,10 +183,19 @@
         var finalInput = document.createElement('input');
         finalInput.type = 'text';
         finalInput.value = row.finalHsCode || row.suggestedHsCode || '';
-        finalInput.placeholder = '직접 입력';
+        finalInput.placeholder = '직접 입력 (6자리 또는 10자리, 점·대시 없이 숫자만 넣어도 인식됩니다)';
+        finalInput.title = '예: 491194, 4911.94, 4911949000, 4911.94-9000 전부 동일하게 인식됩니다.';
         finalInput.className = 'os-cell-input' + (noMatch ? ' os-needs-input' : '');
         finalInput.addEventListener('input', function (event) {
           rows[index].finalHsCode = event.target.value;
+        });
+        finalInput.addEventListener('blur', function (event) {
+          var raw = event.target.value;
+          if (!raw.trim()) return;
+          var normalized = normalizeFinalHsCode(raw);
+          event.target.value = normalized.value;
+          rows[index].finalHsCode = normalized.value;
+          finalInput.classList.toggle('os-needs-input', !normalized.validLength);
         });
         finalTd.appendChild(finalInput);
         tr.appendChild(finalTd);
